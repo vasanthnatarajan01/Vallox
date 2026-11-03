@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # Application PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: schemagenuis_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: schemagenuis_user
+      POSTGRES_PASSWORD: schemagenuis_dev_password
+      POSTGRES_DB: schemagenuis_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U schemagenuis_user -d schemagenuis_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # SQL Sandbox PostgreSQL (Isolated)
+  postgres_sandbox:
+    image: postgres:15-alpine
+    container_name: schemagenuis_sandbox
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sandbox_user
+      POSTGRES_PASSWORD: sandbox_dev_password
+      POSTGRES_DB: sandbox_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - sandbox_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sandbox_user -d sandbox_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+    driver: local
+  sandbox_data:
+    driver: local
